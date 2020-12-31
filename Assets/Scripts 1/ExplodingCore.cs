@@ -1,12 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.Universal;
 
 public class ExplodingCore : MonoBehaviour
 {
+    private ExplodingEngine engineScript;
+    private ExplodingDrill drillScript;
+
     private IEnumerator explosion;
     private IEnumerator pulse;
     private Material coreMaterial;
+    private Light2D lt;
 
     private float intensity;
     private float timeFlashScale = 1;
@@ -15,10 +20,30 @@ public class ExplodingCore : MonoBehaviour
     private float intensityFloorTarget = 0.75f;
     private float intensityRangeTarget = .25f;
     private float timeScaleDelta = 0f;
+    private float originalRadius;
+    private float supernovaValue = 0f;
+    private bool isSupernova = false;
+
     // Start is called before the first frame update
     void Start()
     {
         coreMaterial = GetComponent<SpriteRenderer>().material;
+
+        // Need references to other components to tell them when we explode
+        engineScript = GameObject.FindObjectOfType(typeof(ExplodingEngine)) as ExplodingEngine;
+        drillScript = GameObject.FindObjectOfType(typeof(ExplodingDrill)) as ExplodingDrill;
+
+        foreach (Transform child in transform)
+        {
+            lt = child.gameObject.GetComponent<Light2D>();
+            if (lt != null)
+            {
+                break;
+            }
+        }
+        Debug.Log("ExplodingCore: OK we have a " + lt);
+        originalRadius = lt.pointLightOuterRadius;
+
         if (coreMaterial.HasProperty("GlowIntensity"))
         {
             Debug.Log("Hello World starting pulse");
@@ -36,7 +61,7 @@ public class ExplodingCore : MonoBehaviour
 
         explosion = CoExplosion(explosionForce);
         StartCoroutine(explosion);
-        
+        engineScript.Explode();
     }
 
     private IEnumerator CoCorePulse()
@@ -44,7 +69,7 @@ public class ExplodingCore : MonoBehaviour
         float timeTotal = 0f;
         while (true)
         {
-            if ( intensityRange != intensityRangeTarget)
+            if (intensityRange != intensityRangeTarget)
             {
                 intensityRange = Mathf.MoveTowards(intensityRange, intensityRangeTarget, Time.deltaTime * 5);
             }
@@ -57,8 +82,16 @@ public class ExplodingCore : MonoBehaviour
                 timeFlashScale += timeScaleDelta;
             }
             timeTotal += Time.deltaTime * timeFlashScale;
-            intensity = intensityRange * Mathf.Sin(timeTotal) + intensityRange + intensityFloor;
+            intensity = intensityRange * (-1 * Mathf.Sin(timeTotal)) + intensityRange + intensityFloor;
             coreMaterial.SetFloat("GlowIntensity", intensity);
+            if (isSupernova)
+            {
+                supernovaValue = Mathf.MoveTowards(supernovaValue, 30f, 3f * Time.deltaTime);
+                lt.pointLightOuterRadius = supernovaValue;
+            } else
+            {
+                lt.pointLightOuterRadius = originalRadius * (intensity / 2f) + originalRadius * 0.33f;
+            }
             yield return new WaitForEndOfFrame();
 
         }
@@ -74,11 +107,12 @@ public class ExplodingCore : MonoBehaviour
         }
     }
 
-    private IEnumerator CoExplosion(float explosionForce) 
+    private IEnumerator CoExplosion(float explosionForce)
     {
-        timeScaleDelta = 0.01f;
-        intensityRangeTarget = 1.1f;
-        intensityFloorTarget = 0.5f;
+        timeScaleDelta = Mathf.MoveTowards(timeScaleDelta, 1f, 2*Time.deltaTime);
+        intensityRangeTarget = 0.9f;
+        intensityFloorTarget = 0.6f;
+        isSupernova = true;
 
         yield return new WaitForSecondsRealtime(2f);
         Collider2D[] obInRadius = Physics2D.OverlapCircleAll(gameObject.transform.position, 10f);
@@ -91,7 +125,7 @@ public class ExplodingCore : MonoBehaviour
                 Vector3 displacement3D = other.transform.position - gameObject.transform.position;
                 Vector2 displacement = new Vector2(displacement3D.x, displacement3D.y);
 
-                otherRB.AddForce((displacement.normalized) * explosionForce * (Random.value * 0.75f + 0.75f)  / Mathf.Pow(displacement.magnitude, 2f));
+                otherRB.AddForce((displacement.normalized) * explosionForce * (Random.value * 0.75f + 0.75f) / Mathf.Pow(displacement.magnitude, 2f));
                 otherRB.angularVelocity += (Random.value - .5f) * 420f * (Random.value * 1.5f + 0.5f);
 
                 StartCoroutine(FrictionDrop(otherRB));
@@ -99,12 +133,13 @@ public class ExplodingCore : MonoBehaviour
             }
         }
         StopCoroutine(pulse);
-        foreach(Transform child in transform)
+        foreach (Transform child in transform)
         {
             child.gameObject.SetActive(false);
         }
         StartCoroutine(CoCoreFade());
-
+        engineScript.FadeOut();
+        drillScript.FadeOut();
     }
 
     private IEnumerator FrictionDrop(Rigidbody2D body)
