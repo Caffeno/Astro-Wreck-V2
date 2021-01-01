@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
 
-public class ExplodingCore : MonoBehaviour
+public class ExplodingCore : ShipPart
 {
     private ExplodingEngine engineScript;
     private ExplodingDrill drillScript;
 
     private IEnumerator explosion;
     private IEnumerator pulse;
-    private Material coreMaterial;
     private Light2D lt;
 
-    private float intensity;
     private float timeFlashScale = 1;
     private float intensityRange = 0.25f;
     private float intensityFloor = 0.75f;
@@ -27,7 +25,7 @@ public class ExplodingCore : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        coreMaterial = GetComponent<SpriteRenderer>().material;
+        material = GetComponent<SpriteRenderer>().material;
 
         // Need references to other components to tell them when we explode
         engineScript = GameObject.FindObjectOfType(typeof(ExplodingEngine)) as ExplodingEngine;
@@ -44,11 +42,11 @@ public class ExplodingCore : MonoBehaviour
         Debug.Log("ExplodingCore: OK we have a " + lt);
         originalRadius = lt.pointLightOuterRadius;
 
-        if (coreMaterial.HasProperty("GlowIntensity"))
+        if (material.HasProperty("GlowIntensity"))
         {
             Debug.Log("Hello World starting pulse");
 
-            intensity = coreMaterial.GetFloat("GlowIntensity");
+            intensity = material.GetFloat("GlowIntensity");
             pulse = CoCorePulse();
             StartCoroutine(pulse);
         }
@@ -83,7 +81,7 @@ public class ExplodingCore : MonoBehaviour
             }
             timeTotal += Time.deltaTime * timeFlashScale;
             intensity = intensityRange * (-1 * Mathf.Sin(timeTotal)) + intensityRange + intensityFloor;
-            coreMaterial.SetFloat("GlowIntensity", intensity);
+            material.SetFloat("GlowIntensity", intensity);
             if (isSupernova)
             {
                 supernovaValue = Mathf.MoveTowards(supernovaValue, 30f, 3f * Time.deltaTime);
@@ -92,6 +90,7 @@ public class ExplodingCore : MonoBehaviour
             {
                 lt.pointLightOuterRadius = originalRadius * (intensity / 2f) + originalRadius * 0.33f;
             }
+            
             yield return new WaitForEndOfFrame();
 
         }
@@ -102,7 +101,7 @@ public class ExplodingCore : MonoBehaviour
         while (intensity > 0)
         {
             intensity = Mathf.MoveTowards(intensity, 0f, Time.deltaTime);
-            coreMaterial.SetFloat("GlowIntensity", intensity);
+            material.SetFloat("GlowIntensity", intensity);
             yield return new WaitForEndOfFrame();
         }
     }

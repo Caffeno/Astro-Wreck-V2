@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
 
-public class ExplodingEngine : MonoBehaviour
+public class ExplodingEngine : ShipPart
 {
     private IEnumerator explodeEngineFunction;
     private IEnumerator fadeEngineFunction;
 
-    private Material material;
     private Light2D lt;
 
-    private float intensity;
     private float intensityTarget = 5f;
     private float intensityTimeToMax = 6f;
     private float radiusTarget = 5f;
@@ -33,24 +31,27 @@ public class ExplodingEngine : MonoBehaviour
         originalRadius = lt.pointLightOuterRadius;
     }
 
-    public void Explode()
+    public override void Explode()
     { 
         if (material.HasProperty("GlowIntensity"))
         {
             Debug.Log("Starting Engine explosion coroutine");
             intensity = material.GetFloat("GlowIntensity");
             explodeEngineFunction = CoEngineExplode();
-            fadeEngineFunction = CoEngineFade();
+            //fadeEngineFunction = CoEngineFade();
             StartCoroutine(explodeEngineFunction);
+            base.Explode();
         }
     }
 
-    public void FadeOut()
+    public override void FadeOut()
     {
         StopCoroutine(explodeEngineFunction);
-        StartCoroutine(fadeEngineFunction);
+        base.FadeOut();
+        //StartCoroutine(fadeEngineFunction);
     }
 
+    /*
     private IEnumerator CoEngineFade()
     {
         while (intensity > 0)
@@ -60,6 +61,7 @@ public class ExplodingEngine : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
     }
+    */
 
     private IEnumerator CoEngineExplode()
     {
