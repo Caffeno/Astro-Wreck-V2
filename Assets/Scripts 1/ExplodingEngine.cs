@@ -59,7 +59,7 @@ public class ExplodingEngine : MonoBehaviour
             material.SetFloat("GlowIntensity", intensity);
             yield return new WaitForEndOfFrame();
         }
-    }
+    } 
 
     private IEnumerator CoEngineExplode()
     {
