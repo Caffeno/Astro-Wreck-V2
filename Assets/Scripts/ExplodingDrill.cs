@@ -12,7 +12,7 @@ public class ExplodingDrill : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        material = GetComponent<SpriteRenderer>().material;
+        material = GetComponentInChildren<SpriteRenderer>().material;
         if (material.HasProperty("GlowIntensity"))
         {
             intensity = material.GetFloat("GlowIntensity");   

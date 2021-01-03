@@ -27,7 +27,7 @@ public class ExplodingCore : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        coreMaterial = GetComponent<SpriteRenderer>().material;
+        coreMaterial = GetComponentInChildren<SpriteRenderer>().material;
 
         // Need references to other components to tell them when we explode
         engineScript = GameObject.FindObjectOfType(typeof(ExplodingEngine)) as ExplodingEngine;

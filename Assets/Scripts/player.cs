@@ -5,7 +5,23 @@ using UnityEngine;
 public class player : MonoBehaviour
 {
 
-    [Range(50, 1000)] public float explosionForce = 100f;
+    [Range(0, 100)] public float explosionForce = 25f;
+    [Range(0,100)][SerializeField] private float rotationSpeed = 50f;
+    [Range(0,100)][SerializeField] private float thrustStrength = 10f;
+
+
+    private Rigidbody2D rb;
+
+    private float xin = 0f;
+    private float yin = 0f;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         Collider2D collider = collision.contacts[0].otherCollider;
@@ -13,7 +29,20 @@ public class player : MonoBehaviour
         BreakApart();
         
     }
+    
+    private void Update()
+    {
+        yin = Input.GetAxisRaw("Vertical");
+        xin = Input.GetAxisRaw("Horizontal");
+        rb.AddForce(Time.deltaTime * yin * transform.up * thrustStrength);
+        rb.rotation -= xin * Time.deltaTime * rotationSpeed;
+    }
 
+    private void FixedUpdate()
+    {
+
+
+    }
 
     private void BreakApart()
     {
@@ -24,10 +53,14 @@ public class player : MonoBehaviour
             RB.gravityScale = 0f;
             RB.drag = 3f;
             RB.angularDrag = 3f;
-            if (child.gameObject.name == "Power Core")
+            if (core == null)
             {
                 core = child.GetComponent<ExplodingCore>();
-                StartCoroutine(FrictionDrop(RB));
+                if(core != null)
+                {
+                    StartCoroutine(FrictionDrop(RB));
+
+                }
             }
         }
         transform.DetachChildren();

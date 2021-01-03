@@ -78,6 +78,20 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
+                    "m_Id": "519e289cba55401ba42a3ff69184a821"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "d4f340076da74cbea400201dba1f34a4"
+                },
+                "m_SlotId": 1
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
                     "m_Id": "5732a82fc26d4a92ba12e7aa6ee43a77"
                 },
                 "m_SlotId": 2
@@ -101,20 +115,6 @@
                     "m_Id": "fe79c7543e1d4be1aba72adf44c21dde"
                 },
                 "m_SlotId": 0
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "948155b385b042ff8b4c0ea2134a348e"
-                },
-                "m_SlotId": 0
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "d4f340076da74cbea400201dba1f34a4"
-                },
-                "m_SlotId": 1
             }
         },
         {
@@ -1104,9 +1104,9 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 233.99998474121095,
-            "y": 423.0,
-            "width": 159.0,
+            "x": 121.00001525878906,
+            "y": 277.9999694824219,
+            "width": 158.99998474121095,
             "height": 34.0
         }
     },
@@ -1326,7 +1326,7 @@
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
     "m_Value": {
-        "m_SerializedTexture": "{\"texture\":{\"fileID\":2800000,\"guid\":\"18b529a0f01eb9b479a7978a5c2e6212\",\"type\":3}}",
+        "m_SerializedTexture": "{\"texture\":{\"fileID\":2800000,\"guid\":\"c5535e303e592f049832e94c1b2bdcc0\",\"type\":3}}",
         "m_Guid": ""
     },
     "m_Modifiable": true,

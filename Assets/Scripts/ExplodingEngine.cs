@@ -20,7 +20,7 @@ public class ExplodingEngine : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        material = GetComponent<SpriteRenderer>().material;
+        material = GetComponentInChildren<SpriteRenderer>().material;
         foreach (Transform child in transform)
         { 
             lt = child.gameObject.GetComponent<Light2D>();
