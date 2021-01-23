@@ -29,7 +29,6 @@ public class ExplodingEngine : MonoBehaviour
                 break;
             }
         }
-        Debug.Log("OK we have a " + lt);
         originalRadius = lt.pointLightOuterRadius;
     }
 
@@ -37,7 +36,6 @@ public class ExplodingEngine : MonoBehaviour
     { 
         if (material.HasProperty("GlowIntensity"))
         {
-            Debug.Log("Starting Engine explosion coroutine");
             intensity = material.GetFloat("GlowIntensity");
             explodeEngineFunction = CoEngineExplode();
             fadeEngineFunction = CoEngineFade();
@@ -70,7 +68,6 @@ public class ExplodingEngine : MonoBehaviour
             intensity = 0.75f + intensityTarget * (timeTotal / intensityTimeToMax);
             lt.pointLightOuterRadius = originalRadius + ((timeTotal / intensityTimeToMax) * radiusTarget);
             material.SetFloat("GlowIntensity", intensity);
-            //Debug.Log("Intensity is now at " + intensity);
         
             /*{
                 material.SetFloat("GlowIntensity", 0.25f);

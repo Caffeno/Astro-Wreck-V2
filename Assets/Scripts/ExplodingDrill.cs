@@ -31,7 +31,6 @@ public class ExplodingDrill : MonoBehaviour
         while (intensity > 0)
         {
             intensity = Mathf.MoveTowards(intensity, 0f, Time.deltaTime);
-            Debug.Log("drill intensity now at " + intensity);
             material.SetFloat("GlowIntensity", intensity);
             yield return new WaitForEndOfFrame();
         }

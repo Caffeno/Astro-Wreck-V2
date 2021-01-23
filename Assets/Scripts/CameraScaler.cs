@@ -6,7 +6,7 @@ public class CameraScaler : MonoBehaviour
 {
 
     private Camera Camera;
-    [SerializeField] private player player;
+    [SerializeField] private Player player;
 
 
     private void Start()

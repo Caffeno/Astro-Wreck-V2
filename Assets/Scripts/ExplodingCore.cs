@@ -41,12 +41,10 @@ public class ExplodingCore : MonoBehaviour
                 break;
             }
         }
-        Debug.Log("ExplodingCore: OK we have a " + lt);
         originalRadius = lt.pointLightOuterRadius;
 
         if (coreMaterial.HasProperty("GlowIntensity"))
         {
-            Debug.Log("Hello World starting pulse");
 
             intensity = coreMaterial.GetFloat("GlowIntensity");
             pulse = CoCorePulse();
@@ -57,7 +55,6 @@ public class ExplodingCore : MonoBehaviour
 
     public void Explode(float explosionForce)
     {
-        Debug.Log("Hello World 1");
 
         explosion = CoExplosion(explosionForce);
         StartCoroutine(explosion);
@@ -144,7 +141,6 @@ public class ExplodingCore : MonoBehaviour
 
     private IEnumerator FrictionDrop(Rigidbody2D body)
     {
-        Debug.Log("Lowering Drag for " + body.gameObject.name);
         float vMax = 0;
         float vMin = 0;
         float aMax = 0;
@@ -174,7 +170,6 @@ public class ExplodingCore : MonoBehaviour
 
             yield return new WaitForEndOfFrame();
         }
-        Debug.Log("Drag Gone for " + body.gameObject.name);
 
     }
 }

@@ -2,50 +2,99 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class player : MonoBehaviour
+public class Player : MonoBehaviour
 {
-
+    public float teatherCastRadius = .5f;
+    public float teatherCastRange = 5;
+    public LayerMask teatherableMask;
     [Range(0, 100)] public float explosionForce = 25f;
     [Range(0,100)][SerializeField] private float rotationSpeed = 50f;
-    [Range(0,100)][SerializeField] private float thrustStrength = 10f;
+    [SerializeField] private float thrustStrength = 10f;
 
+    [SerializeField] private GameObject playerCamera;
+
+
+    private CenterOfMassTracker centerOfMass;
 
     private Rigidbody2D rb;
-
+    private FixedJoint2D teather;
     private float xin = 0f;
     private float yin = 0f;
+    private bool alive = true;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        teather = GetComponent<FixedJoint2D>();
+        centerOfMass = FindObjectOfType<CenterOfMassTracker>();
     }
 
 
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Vector2 impact = collision.GetImpactForce();
+
         Collider2D collider = collision.contacts[0].otherCollider;
 
-        BreakApart();
-        
+        foreach (ContactPoint2D contact in collision.contacts)
+        {
+            ExplodingEngine engine = collider.GetComponent<ExplodingEngine>();
+            if (engine != null) { BreakApart(); return; }
+        }
+
+        Debug.Log(collision.collider);
+
+        Astroid asteroid = collision.collider.gameObject.GetComponent<Astroid>();
+        Debug.Log(asteroid);
+
+        if (asteroid != null)
+        {
+            asteroid.Hit(-impact);
+        }
+        //GameObject.Destroy(collision.contacts[0].rigidbody.gameObject);
     }
-    
+
+
     private void Update()
     {
-        yin = Input.GetAxisRaw("Vertical");
-        xin = Input.GetAxisRaw("Horizontal");
-        rb.AddForce(Time.deltaTime * yin * transform.up * thrustStrength);
-        rb.rotation -= xin * Time.deltaTime * rotationSpeed;
+        
     }
 
     private void FixedUpdate()
     {
+        yin = Input.GetAxisRaw("Vertical");
+        xin = Input.GetAxisRaw("Horizontal");
+        if (yin != 0f)
+        {
+            rb.AddForce(Time.deltaTime * yin * transform.up * thrustStrength * rb.mass);
+        }
 
+        if(xin != 0 && !teather.enabled)
+        {
+            AttemptTeather(xin);
+        }
+        else if (teather.enabled && xin == 0)
+        {
+            Detach();
+        }
 
+        //rb.rotation -= xin * Time.deltaTime * rotationSpeed;  Manual rotation
+
+    }
+
+    private void Detach()
+    {
+        teather.enabled = false;
+        //rb.freezeRotation = true;
+        centerOfMass.Detach();
     }
 
     private void BreakApart()
     {
+        alive = false;
+        playerCamera.SetActive(false);
+        Detach();
         ExplodingCore core = null;
         foreach(Transform child in transform)
         {
@@ -53,6 +102,7 @@ public class player : MonoBehaviour
             RB.gravityScale = 0f;
             RB.drag = 3f;
             RB.angularDrag = 3f;
+            RB.interpolation = RigidbodyInterpolation2D.Interpolate;
             if (core == null)
             {
                 core = child.GetComponent<ExplodingCore>();
@@ -74,7 +124,6 @@ public class player : MonoBehaviour
 
     private IEnumerator FrictionDrop(Rigidbody2D body)
     {
-        Debug.Log("Lowering Drag for " + body.gameObject.name);
         float vMax = 0;
         float vMin = 0;
         float aMax = 0;
@@ -104,7 +153,18 @@ public class player : MonoBehaviour
             
             yield return new WaitForEndOfFrame();
         }
-        Debug.Log("Drag Gone for " + body.gameObject.name);
+    }
 
+    private void AttemptTeather(float direction)
+    {
+        Vector2 castDir = (transform.right * direction).normalized;
+        RaycastHit2D castResult = Physics2D.CircleCast(rb.position + castDir * teatherCastRadius, teatherCastRadius, castDir, teatherCastRange, teatherableMask);
+        if (castResult)
+        {
+            teather.enabled = true;
+            teather.connectedBody = castResult.rigidbody;
+            centerOfMass.Attach(castResult.rigidbody);
+            rb.freezeRotation = false;
+        }
     }
 }
