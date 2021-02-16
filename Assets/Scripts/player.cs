@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public static Player instance;
+
     public float teatherCastRadius = .5f;
     public float teatherCastRange = 5;
     public LayerMask teatherableMask;
@@ -13,19 +15,31 @@ public class Player : MonoBehaviour
 
     [SerializeField] private GameObject playerCamera;
 
+    private LootTracker loot;
+
 
     private CenterOfMassTracker centerOfMass;
 
-    private Rigidbody2D rb;
+    [HideInInspector] public Rigidbody2D rb;
     private FixedJoint2D teather;
     private float xin = 0f;
     private float yin = 0f;
     private bool alive = true;
 
-    private void Start()
+    [HideInInspector] public ExplodingEngine engine;
+
+    private void Awake()
     {
+        engine = GetComponentInChildren<ExplodingEngine>();
         rb = GetComponent<Rigidbody2D>();
         teather = GetComponent<FixedJoint2D>();
+        loot = GetComponent<LootTracker>();
+        instance = this;
+    }
+
+    private void Start()
+    {
+
         centerOfMass = FindObjectOfType<CenterOfMassTracker>();
     }
 
@@ -33,7 +47,6 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Vector2 impact = collision.GetImpactForce();
 
         Collider2D collider = collision.contacts[0].otherCollider;
 
@@ -43,22 +56,12 @@ public class Player : MonoBehaviour
             if (engine != null) { BreakApart(); return; }
         }
 
-        Debug.Log(collision.collider);
-
-        Astroid asteroid = collision.collider.gameObject.GetComponent<Astroid>();
-        Debug.Log(asteroid);
-
-        if (asteroid != null)
-        {
-            asteroid.Hit(-impact);
-        }
-        //GameObject.Destroy(collision.contacts[0].rigidbody.gameObject);
     }
 
 
     private void Update()
     {
-        
+        //Pause Button
     }
 
     private void FixedUpdate()
@@ -79,8 +82,6 @@ public class Player : MonoBehaviour
             Detach();
         }
 
-        //rb.rotation -= xin * Time.deltaTime * rotationSpeed;  Manual rotation
-
     }
 
     private void Detach()
@@ -93,6 +94,8 @@ public class Player : MonoBehaviour
     private void BreakApart()
     {
         alive = false;
+        Debug.Log(GetComponent<LootTracker>().goldCollected);
+        GameEvents.instance.PlayerDeathTrigger();
         playerCamera.SetActive(false);
         Detach();
         ExplodingCore core = null;
